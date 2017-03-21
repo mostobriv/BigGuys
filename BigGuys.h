@@ -23,6 +23,7 @@ class BigGuys {
         size_t get_cap() const;
         size_t get_len() const;
      private:
+       void kill_zero();
         std::unique_ptr<BASE> guy;
         size_t len;
         size_t cap;

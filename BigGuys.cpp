@@ -25,15 +25,15 @@ BigGuys::BigGuys(char const * src)
 
     check(src);
 
-    
+
     if (src_len == 0) {
 
         len = 0;
         cap = 2;
-        guy = std::unique_ptr<BASE>(new BASE[2]);   
+        guy = std::unique_ptr<BASE>(new BASE[2]);
 
     } else {
-        
+
 
         cap = src_len / (sizeof(BASE)*2) + 1;
         len = 0;
@@ -63,10 +63,10 @@ BigGuys::BigGuys(char const * src)
             */
 
             temp[i] = 0;
-        } 
+        }
         delete[] temp;
     }
-
+    kill_zero();
     //std::cout << len << ' ' << cap << ' ' << guy.get()[0] << guy.get()[1] << guy.get()[2] << std::endl;
 
 }
@@ -79,7 +79,7 @@ std::istream& operator >> (std::istream & in, BigGuys & foo)
     BigGuys temp(tmp.c_str());
 
     //foo = temp;
-    
+
     return in;
 }
 
@@ -89,7 +89,7 @@ size_t BigGuys::get_len() const
     return len;
 }
 
-size_t BigGuys::get_cap() const 
+size_t BigGuys::get_cap() const
 {
     return cap;
 }
@@ -112,7 +112,7 @@ BigGuys BigGuys::operator+ (BigGuys const & src) const
     BigGuys res(max+1);
     res.len = max+1;
     size_t OF = 0, i;
-    
+
     for(i = 0; i < min; i++) {
         res[i] = ((size_t)guy.get()[i] + (size_t)src[i] + OF) & 0xffff;         //BASE DEPEND
         OF = ((size_t)guy.get()[i] + (size_t)src[i]) >> 16;                     //BASE DEPEND
@@ -122,7 +122,7 @@ BigGuys BigGuys::operator+ (BigGuys const & src) const
         for(; i < len; i++) {
             res[i] = ((size_t)guy.get()[i] + OF) & 0xffff;                      //BASE DEPEND
             OF = ((size_t)guy.get()[i] + OF) >> 16;                             //BASE DEPEND
-        }  
+        }
 
     } else if(i < src.len) {
 
@@ -138,7 +138,35 @@ BigGuys BigGuys::operator+ (BigGuys const & src) const
 
 }
 
+void BigGuys::kill_zero() {
+  BigGuys foo(*this);
+  std::cout << foo << foo.get_len() << ' ' << foo.get_cap() << std::endl;
+  std::cout << "Im in clear\n" << std::endl;
+  if (len == 0)
+    return;
 
+  int i;
+  for(i = 0; i < len && guy.get()[i] == 0; i++);
+  if (i == len) {
+
+    cap = 2;
+    len = 1;
+    guy.~unique_ptr();
+    guy = std::unique_ptr<BASE>(new BASE[cap]);
+    guy.get()[0] = 0;
+
+  } else if (i != 0) {
+    len = len - i;
+    cap = len * 2;
+    guy.~unique_ptr();
+    guy = std::unique_ptr<BASE>(new BASE[cap]);
+    for(int j = i; j < len; j++) {
+      guy.get()[j - i] = foo[j];
+    }
+
+  }
+
+}
 
 BASE& BigGuys::operator[] (size_t i) const
 {
@@ -158,27 +186,13 @@ std::ostream& operator << (std::ostream & out, BigGuys const & foo)
 
     out.unsetf(std::ios::dec);
     out.setf(std::ios::hex | std::ios::uppercase);
-    
-    bool NOT_NULL;
-    long int i;
-    for(i = foo.get_len()-1; i >= 0; i--) {
-        if (foo[i] != 0) {
-            NOT_NULL = true;
-            break;
-        }
-    }
 
-    if (i != -1) {
-        out << foo[i--];
-        for (; i >= 0; i--) {
-            //std::cout << "KEK " << i << std::endl;
-            out << std::setfill('0') << std::setw(sizeof(BASE)*2) << foo[i];
-        }
-        out << std::endl;
-    } else {
-        out << '0' << std::endl; 
+    int i = foo.get_len() - 1;
+    std::cout << foo[i--];
+    for(i; i >=0; i--) {
+          out << std::setfill('0') << std::setw(sizeof(BASE)*2) << foo[i];
     }
-
+    std::cout << std::endl;
     out.unsetf(std::ios::hex | std::ios::uppercase);
     out.setf(std::ios::dec);
     return out;
