@@ -3,6 +3,7 @@
 
 #define check(some_str) { for(size_t i = 0; i < strlen(some_str); i++) {if (strchr("abcdefABCDEF1234567890", some_str[i]) == NULL) throw std::runtime_error("invalid character in string: non-hex value");}}
 
+
 BigGuys::BigGuys(size_t cap)
 {
     len = 0;
@@ -35,32 +36,18 @@ BigGuys::BigGuys(char const * src)
     } else {
 
 
-        cap = src_len / (sizeof(BASE)*2) + 1;
+        cap = src_len / (sizeof(BASE)<<1) + 1;
         len = 0;
         guy = std::unique_ptr<BASE>(new BASE[cap]);
-
-        //std::cout << src_len << std::endl << src_len + ((sizeof(BASE)*2) - (src_len) % (sizeof(BASE)*2)) << std::endl;
 
         int pad = src_len % (sizeof(BASE)<<1) ? ((sizeof(BASE)<<1) - (src_len) % (sizeof(BASE)<<1)) : 0;
         char* temp = new char[src_len + pad + 1];  //padding to src_len countable string
         memset(temp, '0', src_len + pad);
         strcpy(temp+pad, src);
 
-        //std::cout << temp << std::endl;
-
         for ( long int i = strlen(temp)-sizeof(BASE)*2; i >= 0; i-=sizeof(BASE)*2 ) {
-            //std::cout << &temp[i] << std::endl;
             auto num = (BASE) strtoul(&temp[i], NULL, 16);
             guy.get()[len++] = num;
-            /*
-            if (len == cap) {
-                auto kekker = guy.release();
-                cap<<=1;
-                guy = std::unique_ptr<BASE>(new BASE[cap]);
-                memcpy(guy.get(), kekker, len*sizeof(BASE));
-                delete[] kekker;
-            }
-            */
 
             temp[i] = 0;
         }

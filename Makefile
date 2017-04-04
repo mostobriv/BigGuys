@@ -1,9 +1,6 @@
 CXXHEADERS = -std=c++1y -O3
 
-%.o: %.cpp %.h
-	${CXX} -c $< -o $@ $(CXXHEADERS)
-		
-all: main.cpp *.o
+all: main.cpp
 	${CXX} -g $^ -o main $(CXXHEADERS)
 
 clean:

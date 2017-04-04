@@ -1,8 +1,4 @@
-#include "BigGuys.h"
-
-#ifndef some_useful_libs
-    #include <iostream>
-#endif
+#include "BigGuys_v2.rel.h"
 
 int main()
 {
@@ -19,9 +15,12 @@ int main()
     //std::cout << temp + kekker;
     std::cout << temp << temp.get_len() << temp.get_cap() << std::endl;
 */
-  std::string qw;
-  std::getline(std::cin, qw);
-  BigGuys foo(qw.c_str());
-  std::cout << foo;
-    return 0;
+
+  std::string foo, bar;
+  std::getline(std::cin, foo);
+  std::getline(std::cin, bar);
+  BigGuys<short unsigned int> lol(foo.c_str()), kek(bar.c_str());
+  //std::cout << "LOL - " << lol << "KEK - " << kek;
+  std::cout << lol - kek;
+  return 0;
 }
