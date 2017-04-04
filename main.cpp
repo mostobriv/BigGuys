@@ -21,6 +21,6 @@ int main()
   std::getline(std::cin, bar);
   BigGuys<short unsigned int> lol(foo.c_str()), kek(bar.c_str());
   //std::cout << "LOL - " << lol << "KEK - " << kek;
-  std::cout << lol - kek;
+  std::cout << lol * kek;
   return 0;
 }

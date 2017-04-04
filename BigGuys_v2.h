@@ -21,6 +21,7 @@ class BigGuys {
       template<class U> friend std::istream& operator >> (std::istream &, BigGuys<U> &);
       BigGuys<T> operator+ (BigGuys<T> const &);
       BigGuys<T> operator- (BigGuys<T> const &);
+      BigGuys<T> operator* (BigGuys<T> const &);
       size_t get_cap() const;
       size_t get_len() const;
 
