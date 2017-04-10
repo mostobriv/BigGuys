@@ -1,4 +1,4 @@
-#include "BigGuys_v2.h"
+#include "BigGuys.h"
 
 #define CHECK(some_str) { for(size_t i = 0; i < strlen(some_str); i++) {if (strchr("abcdefABCDEF1234567890", some_str[i]) == NULL) throw std::runtime_error("invalid character in string: non-hex value");}}
 #define BASE_SIZE sizeof(T)

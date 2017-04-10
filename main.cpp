@@ -1,4 +1,4 @@
-#include "BigGuys_v2.rel.h"
+#include "BigGuys.rel.h"
 
 int main()
 {
