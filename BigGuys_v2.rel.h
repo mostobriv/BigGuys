@@ -139,28 +139,21 @@ template <typename T>
 BigGuys<T> BigGuys<T>::operator* (BigGuys<T> const & mul) {
     BigGuys<T> tmp(cap + mul.cap);
     tmp.len = len + mul.len;
-/*
-    std::cout << tmp.len << std::endl;
-    std::cout << mul.len << std::endl;
-    std::cout << len << std::endl;
-*/
-    size_t OF = 0, i, j;
+
+    size_t OF, i, j;
     for(i = 0; i < len; i++) {
         if (guy[i] == 0)
             continue;
 
         for(j = 0, OF = 0; j < mul.len; j++) {
-            size_t t = guy[i] * mul[j] + tmp[i+j] + OF;
+            size_t t = (size_t)guy[i] * (size_t)mul[j] + (size_t)tmp[i+j] + OF;
             tmp[i+j] = t & MAX_VAL;
             OF = t / (MAX_VAL + 1);
         }
-        //std::cout << OF <<  " - OF" << std::endl;
-        //tmp[i] = OF;
+        tmp[tmp.len - len + i] = OF;
     }
 
     tmp.clear_insig();
-    std::cout << tmp.len  << " - LEN" << std::endl;
-    //std::cout << tmp[0] << std::endl;
     return tmp;
 }
 
