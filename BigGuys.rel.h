@@ -14,6 +14,11 @@ BigGuys<T>::BigGuys(size_t cap) {
 }
 
 template<typename T>
+BigGuys<T>::BigGuys(BigGuys<T> const &src) {
+    (*this) = src;
+}
+
+template<typename T>
 BigGuys<T>::BigGuys(string const src) {
     CHECK(src.c_str());
 
@@ -75,6 +80,7 @@ BigGuys<T>& BigGuys<T>::operator= (BigGuys<T> const& src) {
     cap = src.cap;
     guy = new T[cap];
     memcpy(guy, src.guy, cap * BASE_SIZE);
+    len = src.len;
 
     return *this;
 }
@@ -155,6 +161,40 @@ BigGuys<T> BigGuys<T>::operator* (BigGuys<T> const & mul) {
 
     tmp.clear_insig();
     return tmp;
+}
+
+template <typename T>
+BigGuys<T> BigGuys<T>::mul_base(T mul) {
+    BigGuys<T> tmp(cap + 1);
+    tmp.len = len + 1;
+
+    size_t OF, i;
+    for(i = 0, OF = 0; i < len; i++) {
+        size_t t = (size_t)guy[i] * mul + OF;
+        tmp[i] = t & MAX_VAL;
+        OF = t / (MAX_VAL + 1);
+    }
+    tmp[i] = OF;
+
+    tmp.clear_insig();
+    return tmp;
+}
+
+template <typename T>
+std::tuple<BigGuys<T>, T> BigGuys<T>::div_base(T diver) {
+    BigGuys<T> tmp(cap);
+    tmp.len = len;
+
+    long unsigned int r = 0, t = 0;
+    for(int i = len-1; i >= 0; i--) {
+        t = guy[i] + r * (MAX_VAL + 1);
+        tmp[i] = t / diver;
+        r = t % diver;
+    }
+
+    tmp.clear_insig();
+
+    return std::make_tuple(tmp, (T)r);
 }
 
 template <typename T>

@@ -19,8 +19,24 @@ int main()
   std::string foo, bar;
   std::getline(std::cin, foo);
   std::getline(std::cin, bar);
-  BigGuys<short unsigned int> lol(foo.c_str()), kek(bar.c_str());
+  BigGuys<unsigned short int> lol(foo.c_str());
+  unsigned short int kek = std::stoul(bar, nullptr, 16);
+  /*
+  BigGuys<unsigned short int> lol(foo.c_str()), kek(bar.c_str());
   //std::cout << "LOL - " << lol << "KEK - " << kek;
-  std::cout << lol * kek;
+  */
+  auto tmp = lol.div_base(kek);
+
+  std::cout << std::get<0>(tmp);
+
+  std::cout.unsetf(std::ios::dec);
+  std::cout.setf(std::ios::hex | std::ios::uppercase);
+
+
+  std::cout << std::get<1>(tmp) << std::endl;
+
+
+  std::cout.unsetf(std::ios::hex | std::ios::uppercase);
+  std::cout.setf(std::ios::dec);
   return 0;
 }

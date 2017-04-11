@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 #include <iomanip>
+#include <tuple>
 
 using std::string;
 
@@ -22,6 +23,9 @@ class BigGuys {
       BigGuys<T> operator+ (BigGuys<T> const &);
       BigGuys<T> operator- (BigGuys<T> const &);
       BigGuys<T> operator* (BigGuys<T> const &);
+      BigGuys<T> mul_base(T);
+      std::tuple<BigGuys<T>, T> div_base(T);
+      T mod_base(T);
       size_t get_cap() const;
       size_t get_len() const;
 
