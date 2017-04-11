@@ -15,16 +15,18 @@ int main()
     //std::cout << temp + kekker;
     std::cout << temp << temp.get_len() << temp.get_cap() << std::endl;
 */
-
+/*
   std::string foo, bar;
   std::getline(std::cin, foo);
   std::getline(std::cin, bar);
   BigGuys<unsigned short int> lol(foo.c_str());
   unsigned short int kek = std::stoul(bar, nullptr, 16);
+*/
   /*
   BigGuys<unsigned short int> lol(foo.c_str()), kek(bar.c_str());
   //std::cout << "LOL - " << lol << "KEK - " << kek;
   */
+
   auto tmp = lol.div_base(kek);
 
   std::cout << std::get<0>(tmp);
@@ -38,5 +40,6 @@ int main()
 
   std::cout.unsetf(std::ios::hex | std::ios::uppercase);
   std::cout.setf(std::ios::dec);
+
   return 0;
 }

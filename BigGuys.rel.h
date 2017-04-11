@@ -230,13 +230,10 @@ std::ostream& operator<< (std::ostream& out, const BigGuys<T> &foo) {
     out.unsetf(std::ios::dec);
     out.setf(std::ios::hex | std::ios::uppercase);
 
-    out << foo[i--];
-    //if our bigguy consist not of only one base
-    if (foo.get_len() != 1) {
-        while(i > 0)
-            out << std::setfill('0') << std::setw(SYM_GROUP) << foo[i--];
-        out << std::setfill('0') << std::setw(SYM_GROUP) << foo[i];
-    }
+
+    while(i > 0)
+        out << foo[i--] << std::setfill('0') << std::setw(SYM_GROUP);
+    out << foo[i] << std::setfill('0') << std::setw(SYM_GROUP);
     out << std::endl;
 
     out.unsetf(std::ios::hex | std::ios::uppercase);
