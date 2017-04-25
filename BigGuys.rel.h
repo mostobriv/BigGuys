@@ -198,6 +198,36 @@ std::tuple<BigGuys<T>, T> BigGuys<T>::div_base(T diver) {
 }
 
 template <typename T>
+BigGuys<T> BigGuys<T>::operator/ (BigGuys<T> const & diver) {
+
+}
+
+template <typename T>
+BigGuys<T> BigGuys<T>::power(size_t const pw) const {
+    BigGuys<T> tmp("1");
+
+    for(size_t i = 1; i <= pw; i++)
+        tmp = tmp * (*this);
+
+    return tmp;
+}
+
+template <typename T>
+bool BigGuys<T>::operator> (BigGuys<T> const &cmp) const {
+    if (len > cmp.len)
+        return true;
+    else if (len < cmp.len)
+        return false;
+
+    for (size_t i = 0; i < len; i--) {
+        if (guy[i] > cmp[i])
+            return true;
+        else if (guy[i] < cmp[i])
+            return false;
+    }
+}
+
+template <typename T>
 T& BigGuys<T>::operator[] (size_t i) const {
     if (i >= len)
         throw std::runtime_error("Invalid index(too big)");
@@ -231,9 +261,13 @@ std::ostream& operator<< (std::ostream& out, const BigGuys<T> &foo) {
     out.setf(std::ios::hex | std::ios::uppercase);
 
 
-    while(i > 0)
-        out << foo[i--] << std::setfill('0') << std::setw(SYM_GROUP);
-    out << foo[i] << std::setfill('0') << std::setw(SYM_GROUP);
+    std::cout << foo[i--];
+    if (foo.get_len() != 1) {
+        while(i > 0) {
+            out << std::setfill('0') << std::setw(SYM_GROUP) << foo[i--];
+        }
+        out << std::setfill('0') << std::setw(SYM_GROUP) << foo[i];
+    }
     out << std::endl;
 
     out.unsetf(std::ios::hex | std::ios::uppercase);
