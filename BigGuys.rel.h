@@ -4,7 +4,7 @@
 #define BASE_SIZE sizeof(T)
 #define SYM_GROUP (BASE_SIZE<<1)
 #define MAX_VAL ((1<<(sizeof(T)<<3)) - 1)
-
+#define BASE (MAX_VAL+1)
 
 template<typename T>
 BigGuys<T>::BigGuys(size_t cap) {
@@ -200,6 +200,18 @@ std::tuple<BigGuys<T>, T> BigGuys<T>::div_base(T diver) {
 template <typename T>
 BigGuys<T> BigGuys<T>::operator/ (BigGuys<T> const & diver) {
 
+    if ((diver.get_len() == 0) || (diver.get_len() == 1) && (diver[0] == 0))
+        throw std::runtime_error("Dividing by zero or None");
+
+    size_t d = BASE / (diver[0] + 1);
+    if (d != 1) {
+        (*this) = (*this).mul_base(d);
+        diver = diver.mul_base(d);
+    } else {
+        BigGuys<T> tmp(cap);
+        tmp.len = len+1;
+        memcpy()
+    }
 }
 
 template <typename T>
