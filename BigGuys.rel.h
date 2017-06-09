@@ -54,7 +54,7 @@ BigGuys<T>::BigGuys(string const src) {
 
 template <typename T>
 void BigGuys<T>::clear_insig() {
-    //std::cout << "DEBUG START\n";
+ //std::cout << "DEBUG START\n";
     if (len == 0)
         return;
     //printf("%p\n", guy);
@@ -77,6 +77,7 @@ void BigGuys<T>::clear_insig() {
         len = i+1;
     }
     //std::cout << "DEBUG END\n";
+
 }
 
 template <typename T>
@@ -203,109 +204,103 @@ std::tuple<BigGuys<T>, T> BigGuys<T>::div_base(T diver) {
 }
 
 template <typename T>
-std::tuple<BigGuys<T>, BigGuys<T>> BigGuys<T>::operator/ (BigGuys<T> const & diver) {
+bool BigGuys<T>::operator >= (BigGuys<T> const &source) const {
+    return !( source > (*this));
+}
 
-    int diff_len = len - diver.get_len();
-    BigGuys<T> this_clone, diver_clone;
-    this_clone = (*this);
-    diver_clone = diver;
+template <typename T>
+std::tuple<BigGuys<T>, BigGuys<T>> BigGuys<T>::operator/ (BigGuys<T> & source) {
+    BigGuys<T> this_copy, source_copy;
+    this_copy = (*this);
+    source_copy = source;
 
-    if ((diver.get_len() == 0) || (diver.get_len() == 1) && (diver[0] == 0))
-        throw std::runtime_error("Dividing by zero or None");
-
-    if (diver_clone > this_clone) {
-        BigGuys<T> tmp("0");
-        return std::make_tuple(tmp, this_clone);
+    int m = len - source.len;
+    if( m<0 ){
+        BigGuys<T> res("0");
+        return std::make_tuple(res, this_copy);
     }
-
-    if (diver_clone.get_len() == 1) {
-        auto kek = this_clone.div_base(diver[0]);
-        BigGuys<T> res(1), some_temp;
-        res.len = 1;
-        res[0] = std::get<1>(kek);
-        some_temp = std::get<0>(kek);
-        res.clear_insig();
-        some_temp.clear_insig();
-        
-        return std::make_tuple(some_temp, res);
+    /*
+    if( len == 1 ){
+        res.div.guy[0] = guy[0] / source.guy[0];
+        res.r.guy[0] = guy[0] % source.guy[0];
+        res.div.len = 1;
+        res.r.len = 1;
+        return res;
     }
+    if( source.len == 1 ){
+        result = (*this)/source.guy[0];
+        res.div = result.div;
+        res.r.guy[0] = result.r;
+        res.r.len = 1;
+        return res;
+    }
+*/
+    int long long temp = 0;
+    //BASE long base = (BASE long)std::numeric_limits< BASE >::max()+1;
+    BigGuys<T> r(m+1);
+    r.len = m+1;
+    size_t d = BASE / (source.guy[source.len-1]+1);
+    *this = this->mul_base(d);
+    source = source.mul_base(d);
+    BigGuys<T> tmp(len+1);
+    tmp.len = len+1;
+    for(size_t i=0; i<len; ++i){
+        tmp.guy[i] = guy[i];
+    }
+    tmp.guy[len] = 0;
+    int n = source.len;
+    for(int j=m; j>=0; --j){
+        bool flag;
+        BigGuys<T> tmp1(n+1);
+        flag = false;
+        temp = (tmp.guy[j+n]*BASE + tmp.guy[j+n-1])/source.guy[n-1];
+        unsigned int long tempr = (tmp.guy[j+n]*BASE + tmp.guy[j+n-1])-temp*source.guy[n-1];
+        while( (tempr < BASE) && (temp*source.guy[n-2] > tempr*BASE + guy[j+n-2]) ){
+            --temp;
+            tempr += source.guy[n-1];
+        }
+        for(int k=n; k>=0; --k){
+            tmp1.guy[k] = tmp.guy[j+k]; 
+        }
+        tmp1.len = tmp1.cap;
 
-    BigGuys<T> res, mod(diff_len+1);
-    mod.len = diff_len+1;
-
-    size_t d = BASE / (diver[diver.len - 1] + 1);
-    //std::cout << d << "-- d --\n";
-    //may be shoud to add same thing as in `else` branch
-    //std::cout << "len before - " << this_clone.len << std::endl;
-    this_clone = this_clone.mul_base(d);
-    diver_clone = diver_clone.mul_base(d);
-    std::cout << "DEBUG\n" << this_clone << diver_clone;
-    //std::cout << "len after - " << this_clone.len << std::endl;
-
-    BigGuys<T> buf(this_clone.len + 1);
-    buf.len = this_clone.len + 1;
-    memcpy(buf.guy, this_clone.guy, this_clone.len * BASE_SIZE);
-    buf[this_clone.len] = 0;
-   
-    auto tlen = diver_clone.get_len();
-    for(int j = diff_len; j >= 0; j--) {
-        bool is_negative = false;
-        BigGuys temp(tlen+1);
-        temp.len = tlen + 1;
-        //memcpy(temp.guy, guy, diver.get_len() * BASE_SIZE);
-        //is_negative = false;
-
-        unsigned int long step_3 = (((size_t)buf[j+tlen]) * BASE + buf[j+tlen-1]) / diver_clone[tlen-1];
-        std::cout << step_3 << " -- q^ --\n" << buf[j+tlen] << " dafuq\n";// << diver_clone[tlen-1] << " KEK\n";
-        //Alexander gave me some advice about arithmetic
-        unsigned int long advice = (buf[j+tlen] * BASE + buf[j+tlen-1]) - step_3 * diver_clone[tlen-1];
-        while (((step_3 * diver_clone[tlen-2]) > (advice * BASE + guy[j+tlen-2])) && (advice < BASE)) {
-            --step_3;
-            advice += diver_clone[tlen-1];
+        for(int i=tmp1.len-1; i>0; --i) {
+            if(guy[i]==0)
+                --tmp.len;
         }
 
-        for(int i = tlen; i >= 0; i--) {
-            temp[i] = buf[i+j]; 
-        }
-        temp.clear_insig();
-
-        if ((diver_clone.mul_base(step_3) > temp) == 0) {
-            temp = temp - diver_clone.mul_base(step_3);
+        if( tmp1 >= source.mul_base(temp)){
+            tmp1 = tmp1 - source.mul_base(temp);
         } else {
-            BigGuys<T> another_temporary_var(tlen+2);
-            another_temporary_var.len = tlen + 2;
-            another_temporary_var[tlen+1] = 1;
-            temp = (another_temporary_var - diver_clone.mul_base(step_3)) + temp;
-            is_negative = true;
+            BigGuys<T> tmpBase(n+2);
+            tmpBase.len = n+2;
+            tmpBase.guy[n+1] = 1;
+            tmp1 = (tmpBase - source.mul_base(temp)) + tmp1;
+            flag = true;
         }
-
-
-        mod[j] = step_3;
-        if (is_negative) {
-            mod[j]--;
-            temp = temp + diver_clone;
+        r.guy[j] = temp;  
+        if( flag == true ){
+            --r.guy[j];
+            tmp1 = tmp1 + source;
         }
-        
-        //std::cout << "Before for\n";        
-        for(int i = tlen; i >= 0; i--) {
-            if ( i < temp.len ) {
-                buf[j+i] = temp[i];
+        for(int k=n; k>=0; --k){
+            if( k < tmp1.len ){
+                tmp.guy[j+k] = tmp1.guy[k];
             } else {
-                buf[j+i] = 0;
+                tmp.guy[j+k] = 0;
             }
         }
-        //std::cout << "Here is no after sorry\n";
-        //std::cout << "before buf\n";
-        buf.clear_insig();
-        //std::cout << "after buf\n";
+        for(int i=tmp.len-1; i>0; --i) {
+            if(guy[i]==0)
+                --tmp.len;
+        }
     }
+    r.clear_insig();
+    BigGuys<T> mod;
+    mod = std::get<0>(tmp.div_base(d));
+    
+    return std::make_tuple(r, mod);
 
-    mod.len = tlen+1;
-    mod.clear_insig();
-    res = std::get<0>(buf.div_base(d));
-    res.clear_insig();
-
-    return std::make_tuple(res, mod);
 }
 
 template <typename T>
@@ -398,3 +393,110 @@ template<typename T>
 size_t BigGuys<T>::get_len() const {
     return len;
 }
+
+
+/*
+{
+        int diff_len = len - diver.get_len();
+    BigGuys<T> this_clone, diver_clone;
+    this_clone = (*this);
+    diver_clone = diver;
+
+    if ((diver.get_len() == 0) || (diver.get_len() == 1) && (diver[0] == 0))
+        throw std::runtime_error("Dividing by zero or None");
+
+    if (diver_clone > this_clone) {
+        BigGuys<T> tmp("0");
+        return std::make_tuple(tmp, this_clone);
+    }
+
+    if (diver_clone.get_len() == 1) {
+        auto kek = this_clone.div_base(diver[0]);
+        BigGuys<T> res(1), some_temp;
+        res.len = 1;
+        res[0] = std::get<1>(kek);
+        some_temp = std::get<0>(kek);
+        res.clear_insig();
+        some_temp.clear_insig();
+        
+        return std::make_tuple(some_temp, res);
+    }
+
+    BigGuys<T> res, mod(diff_len+1);
+    mod.len = diff_len+1;
+
+    size_t d = BASE / (diver[diver.len - 1] + 1);
+    //std::cout << d << "-- d --\n";
+    //may be shoud to add same thing as in `else` branch
+    //std::cout << "len before - " << this_clone.len << std::endl;
+    this_clone = this_clone.mul_base(d);
+    diver_clone = diver_clone.mul_base(d);
+    std::cout << "DEBUG\n" << this_clone << diver_clone;
+    //std::cout << "len after - " << this_clone.len << std::endl;
+
+    BigGuys<T> buf(this_clone.len + 1);
+    buf.len = this_clone.len + 1;
+    memcpy(buf.guy, this_clone.guy, this_clone.len * BASE_SIZE);
+    std::cout << BASE << std::endl;
+   
+    auto tlen = diver_clone.get_len();
+    for(int j = diff_len; j >= 0; j--) {
+        bool is_negative = false;
+        BigGuys temp(tlen+1);
+        temp.len = tlen + 1;
+
+        std::cout << "Before 3_step\n";
+        unsigned int long step_3 = (((size_t)buf.guy[j+tlen]) * BASE + buf.guy[j+tlen-1]) / diver_clone[tlen-1];
+        std::cout << step_3 << " -- q^ --\n" << buf.guy[j+tlen] << " dafuq\n";// << diver_clone[tlen-1] << " KEK\n";
+        //Alexander gave me some advice about arithmetic
+        unsigned int long advice = (buf.guy[j+tlen] * BASE + buf.guy[j+tlen-1]) - step_3 * diver_clone[tlen-1];
+        std::cout << "Right before while loop\n";
+        while (((step_3 * diver_clone[tlen-2]) > (advice * BASE + guy[j+tlen-2])) && (advice < BASE)) {
+            --step_3;
+            advice += diver_clone[tlen-1];
+        }
+
+        for(int i = tlen; i >= 0; i--) {
+            temp.guy[i] = buf.guy[i+j]; 
+        }
+        temp.clear_insig();
+
+        if ((diver_clone.mul_base(step_3) > temp) == 0) {
+            temp = temp - diver_clone.mul_base(step_3);
+        } else {
+            BigGuys<T> another_temporary_var(tlen+2);
+            another_temporary_var.len = tlen + 2;
+            another_temporary_var[tlen+1] = 1;
+            temp = (another_temporary_var - diver_clone.mul_base(step_3)) + temp;
+            is_negative = true;
+        }
+
+
+        mod[j] = step_3;
+        if (is_negative) {
+            mod[j]--;
+            temp = temp + diver_clone;
+        }
+
+        std::cout << "Before for\n";        
+        for(int i = tlen; i >= 0; i--) {
+            if ( i < temp.len ) {
+                buf.guy[j+i] = temp.guy[i];
+            } else {
+                buf.guy[j+i] = 0;
+            }
+        }
+        std::cout << "Here is no after sorry\n";
+        //std::cout << "before buf\n";
+        buf.clear_insig();
+        //std::cout << "after buf\n";
+    }
+
+    mod.len = tlen+1;
+    mod.clear_insig();
+    res = std::get<0>(buf.div_base(d));
+    res.clear_insig();
+    
+    return std::make_tuple(res, mod);
+}
+*/

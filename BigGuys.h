@@ -23,8 +23,9 @@ class BigGuys {
       BigGuys<T> operator+ (BigGuys<T> const &);
       BigGuys<T> operator- (BigGuys<T> const &);
       BigGuys<T> operator* (BigGuys<T> const &);
-      std::tuple<BigGuys<T>, BigGuys<T>> operator/ (BigGuys<T> const &);
+      std::tuple<BigGuys<T>, BigGuys<T>> operator/ (BigGuys<T> &);
       bool operator> (BigGuys<T> const &) const;
+      bool operator >= (BigGuys<T> const &source) const;
       BigGuys<T> mul_base(T);
       std::tuple<BigGuys<T>, T> div_base(T);
       T mod_base(T);
