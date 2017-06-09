@@ -1,10 +1,11 @@
 #include "BigGuys.h"
+#include <stdio.h>
 
 #define CHECK(some_str) { for(size_t i = 0; i < strlen(some_str); i++) {if (strchr("abcdefABCDEF1234567890", some_str[i]) == NULL) throw std::runtime_error("invalid character in string: non-hex value");}}
 #define BASE_SIZE sizeof(T)
 #define SYM_GROUP (BASE_SIZE<<1)
 #define MAX_VAL ((1<<(sizeof(T)<<3)) - 1)
-#define BASE (MAX_VAL+1)
+#define BASE (((size_t)MAX_VAL)+1)
 
 template<typename T>
 BigGuys<T>::BigGuys(size_t cap) {
@@ -15,7 +16,10 @@ BigGuys<T>::BigGuys(size_t cap) {
 
 template<typename T>
 BigGuys<T>::BigGuys(BigGuys<T> const &src) {
-    (*this) = src;
+    cap = src.cap;
+    guy = new T[cap];
+    memcpy(guy, src.guy, cap * BASE_SIZE);
+    len = src.len;
 }
 
 template<typename T>
@@ -50,10 +54,10 @@ BigGuys<T>::BigGuys(string const src) {
 
 template <typename T>
 void BigGuys<T>::clear_insig() {
-
+    //std::cout << "DEBUG START\n";
     if (len == 0)
         return;
-
+    //printf("%p\n", guy);
     long int i;
     for(i = len - 1; i >= 0 && guy[i] == 0; i--);
 
@@ -72,6 +76,7 @@ void BigGuys<T>::clear_insig() {
         cap = i+1;
         len = i+1;
     }
+    //std::cout << "DEBUG END\n";
 }
 
 template <typename T>
@@ -198,20 +203,106 @@ std::tuple<BigGuys<T>, T> BigGuys<T>::div_base(T diver) {
 }
 
 template <typename T>
-BigGuys<T> BigGuys<T>::operator/ (BigGuys<T> const & diver) {
+std::tuple<BigGuys<T>, BigGuys<T>> BigGuys<T>::operator/ (BigGuys<T> const & diver) {
+
+    int diff_len = len - diver.get_len();
+    BigGuys<T> this_clone, diver_clone;
+    this_clone = *this;
+    diver_clone = diver;
 
     if ((diver.get_len() == 0) || (diver.get_len() == 1) && (diver[0] == 0))
         throw std::runtime_error("Dividing by zero or None");
 
-    size_t d = BASE / (diver[0] + 1);
-    if (d != 1) {
-        (*this) = (*this).mul_base(d);
-        diver = diver.mul_base(d);
-    } else {
-        BigGuys<T> tmp(cap);
-        tmp.len = len+1;
-        memcpy()
+    if (diver > this_clone) {
+        BigGuys<T> tmp("0");
+        return std::make_tuple(tmp, this_clone);
     }
+
+    if (diver.get_len() == 1) {
+        auto kek = this_clone.div_base(diver[0]);
+        BigGuys<T> res(1), some_temp;
+        res.len = 1;
+        res[0] = std::get<1>(kek);
+        some_temp = std::get<0>(kek);
+        res.clear_insig();
+        some_temp.clear_insig();
+        
+        return std::make_tuple(some_temp, res);
+    }
+
+    BigGuys<T> res(diff_len+1), mod(diff_len+1);
+    res.len = diff_len+1;
+    mod.len = diff_len+1;
+
+    size_t d = BASE / (diver[diver.len - 1] + 1);
+        //may be shoud to add same thing as in `else` branch
+    this_clone = this_clone.mul_base(d);
+    diver_clone = diver_clone.mul_base(d);
+
+    BigGuys<T> buf(len + 1);
+    buf.len = len + 1;
+    memcpy(buf.guy, guy, len * BASE_SIZE);
+
+    bool is_negative;
+    auto tlen = diver_clone.get_len();
+    for(int j = diff_len; j >= 0; j--) {
+
+        BigGuys temp(tlen+1);
+        is_negative = false;
+        temp.len = tlen + 1;
+        //memcpy(temp.guy, guy, diver.get_len() * BASE_SIZE);
+        //is_negative = false;
+
+        int long step_3 = (buf[j+tlen] * BASE + buf[j+tlen-1]) / diver_clone[tlen-1];
+        //Alexander gave me some advice about arithmetic
+        int long advice = (buf[j+tlen] * BASE + buf[j+tlen-1]) - step_3 * diver_clone[tlen-1];
+        while (((step_3 * diver_clone[tlen-2]) > (advice * BASE + guy[j+tlen-2])) && (advice < BASE)) {
+            step_3--;
+            advice += diver_clone[tlen-1];
+        }
+
+        for(int i = tlen; i >= 0; i--) {
+            temp[i] = buf[i+j]; 
+        }
+        temp.clear_insig();
+
+        if (!(diver_clone.mul_base(step_3) > temp)) {
+            temp = temp - diver_clone.mul_base(step_3);
+        } else {
+            BigGuys<T> another_temporary_var(tlen+2);
+            another_temporary_var.len = tlen + 2;
+            another_temporary_var[tlen+1] = 1;
+            temp = (another_temporary_var - diver_clone.mul_base(step_3)) + temp;
+            is_negative = true;
+        }
+
+
+        mod[j] = step_3;
+        if (is_negative) {
+            mod[j]--;
+            temp = temp + diver_clone;
+        }
+        
+        std::cout << "Before for\n";        
+        for(int i = tlen; i >= 0; i--) {
+            if ( i < temp.len ) {
+                buf[j+i] = temp[i];
+            } else {
+                buf[j+i] = 0;
+            }
+        }
+        std::cout << "Here is no after sorry\n";
+        //std::cout << "before buf\n";
+        buf.clear_insig();
+        //std::cout << "after buf\n";
+    }
+
+    mod.len = tlen+1;
+    mod.clear_insig();
+    res = std::get<0>(buf.div_base(d));
+    res.clear_insig();
+
+    return std::make_tuple(res, mod);
 }
 
 template <typename T>
@@ -241,8 +332,10 @@ bool BigGuys<T>::operator> (BigGuys<T> const &cmp) const {
 
 template <typename T>
 T& BigGuys<T>::operator[] (size_t i) const {
-    if (i >= len)
+    if (i >= len) {
+        std::cout << "Your index - " << i << std::endl;
         throw std::runtime_error("Invalid index(too big)");
+    }
 
     return guy[i];
 }
