@@ -8,9 +8,10 @@
 #define BASE (((size_t)MAX_VAL)+1)
 
 template<typename T>
-BigGuys<T>::BigGuys(size_t cap) {
+BigGuys<T>::BigGuys(size_t t) {
     len = 0;
-    guy = new T[cap];
+    guy = new T[t];
+    cap = t;
     memset(guy, 0, cap * BASE_SIZE);
 }
 
@@ -205,8 +206,9 @@ std::tuple<BigGuys<T>, T> BigGuys<T>::div_base(T diver) {
 
 template <typename T>
 bool BigGuys<T>::operator >= (BigGuys<T> const &source) const {
-    return !( source > (*this));
+    return !(source > (*this));
 }
+
 
 template <typename T>
 std::tuple<BigGuys<T>, BigGuys<T>> BigGuys<T>::operator/ (BigGuys<T> & source) {
@@ -219,7 +221,8 @@ std::tuple<BigGuys<T>, BigGuys<T>> BigGuys<T>::operator/ (BigGuys<T> & source) {
         BigGuys<T> res("0");
         return std::make_tuple(res, this_copy);
     }
-    /*
+
+/*
     if( len == 1 ){
         res.div.guy[0] = guy[0] / source.guy[0];
         res.r.guy[0] = guy[0] % source.guy[0];
@@ -227,58 +230,76 @@ std::tuple<BigGuys<T>, BigGuys<T>> BigGuys<T>::operator/ (BigGuys<T> & source) {
         res.r.len = 1;
         return res;
     }
+*/    
     if( source.len == 1 ){
-        result = (*this)/source.guy[0];
-        res.div = result.div;
-        res.r.guy[0] = result.r;
-        res.r.len = 1;
-        return res;
+        auto res = this->div_base(source.guy[0]);
+        BigGuys<T> kek(1);
+        kek.len = 1;
+        kek.guy[0] = std::get<1>(res);
+
+        return std::make_tuple(std::get<0>(res), kek);
     }
-*/
-    int long long temp = 0;
+
+    unsigned int long temp = 0;
     //BASE long base = (BASE long)std::numeric_limits< BASE >::max()+1;
     BigGuys<T> r(m+1);
     r.len = m+1;
     size_t d = BASE / (source.guy[source.len-1]+1);
     *this = this->mul_base(d);
     source = source.mul_base(d);
+    //std::cout << "-----------------\n" << (*this) << source << "-------------------\n";
     BigGuys<T> tmp(len+1);
     tmp.len = len+1;
+    //std::cout << "some this.len " << len << std::endl;
     for(size_t i=0; i<len; ++i){
         tmp.guy[i] = guy[i];
     }
+    //std::cout << tmp << "HUUUUUUUUUUUUUGE\n";
     tmp.guy[len] = 0;
     int n = source.len;
     for(int j=m; j>=0; --j){
         bool flag;
         BigGuys<T> tmp1(n+1);
         flag = false;
-        temp = (tmp.guy[j+n]*BASE + tmp.guy[j+n-1])/source.guy[n-1];
-        unsigned int long tempr = (tmp.guy[j+n]*BASE + tmp.guy[j+n-1])-temp*source.guy[n-1];
-        while( (tempr < BASE) && (temp*source.guy[n-2] > tempr*BASE + guy[j+n-2]) ){
+        temp = ((long unsigned int)(tmp.guy[j+n])*BASE + tmp.guy[j+n-1])/source.guy[n-1];
+        unsigned int long tempr = ((long unsigned int)(tmp.guy[j+n])*BASE + tmp.guy[j+n-1])-temp*source.guy[n-1];
+        while( (tempr < BASE) && ((temp*source.guy[n-2]) > (tempr*BASE + guy[j+n-2])) ){
             --temp;
             tempr += source.guy[n-1];
         }
+        //std::cout << tmp << "some tmp\n";
+        //std::cout << "temp after while-loop - " << temp << std::endl;
+        //::cout << "Also n is - " << n << std::endl;
         for(int k=n; k>=0; --k){
-            tmp1.guy[k] = tmp.guy[j+k]; 
+            //std::cout << "IN FOR LOOP - " << tmp.guy[j+k] << std::endl;
+            tmp1.guy[k] = tmp.guy[j+k];
         }
+        tmp1.len = 4;
+        //std::cout << "some tmp1 for WUT?\n" << tmp1;
         tmp1.len = tmp1.cap;
-
-        for(int i=tmp1.len-1; i>0; --i) {
-            if(guy[i]==0)
-                --tmp.len;
+        //std::cout << tmp1.cap << "cap\n";
+        for (long int t = tmp1.len - 1; t > 0; t--) {
+            if (tmp1.guy[t] == 0)
+                tmp1.len--;
+            else
+                break;
         }
 
+        //std::cout << "some tmp1 for you " << tmp1;
+
+        //std::cout << "LEFT SIDE\n" << tmp1 << "RIGHT SIDE\n"<< source.mul_base(temp);
         if( tmp1 >= source.mul_base(temp)){
             tmp1 = tmp1 - source.mul_base(temp);
         } else {
+            //std::cout << "Not right branch\n";
             BigGuys<T> tmpBase(n+2);
             tmpBase.len = n+2;
             tmpBase.guy[n+1] = 1;
             tmp1 = (tmpBase - source.mul_base(temp)) + tmp1;
             flag = true;
         }
-        r.guy[j] = temp;  
+        //std::cout << "tmp1 on 4 step is " << tmp1 << "asdfastqwataw45t\n";
+        r.guy[j] = temp;
         if( flag == true ){
             --r.guy[j];
             tmp1 = tmp1 + source;
@@ -290,15 +311,18 @@ std::tuple<BigGuys<T>, BigGuys<T>> BigGuys<T>::operator/ (BigGuys<T> & source) {
                 tmp.guy[j+k] = 0;
             }
         }
-        for(int i=tmp.len-1; i>0; --i) {
-            if(guy[i]==0)
-                --tmp.len;
+        for (long int t = tmp.len - 1; t > 0; t--) {
+            if (tmp.guy[t] == 0)
+                tmp.len--;
+            else
+                break;
         }
+        //std::cout << "KEK\n" << tmp << "KEK\n";
     }
     r.clear_insig();
     BigGuys<T> mod;
     mod = std::get<0>(tmp.div_base(d));
-    
+
     return std::make_tuple(r, mod);
 
 }
@@ -320,7 +344,7 @@ bool BigGuys<T>::operator> (BigGuys<T> const &cmp) const {
     else if (len < cmp.len)
         return false;
 
-    for (size_t i = 0; i < len; i--) {
+    for (long int i = len-1; i >= 0; i--) {
         if (guy[i] > cmp[i])
             return true;
         else if (guy[i] < cmp[i])
@@ -397,7 +421,7 @@ size_t BigGuys<T>::get_len() const {
 
 /*
 {
-        int diff_len = len - diver.get_len();
+    int diff_len = len - diver.get_len();
     BigGuys<T> this_clone, diver_clone;
     this_clone = (*this);
     diver_clone = diver;
@@ -418,7 +442,7 @@ size_t BigGuys<T>::get_len() const {
         some_temp = std::get<0>(kek);
         res.clear_insig();
         some_temp.clear_insig();
-        
+
         return std::make_tuple(some_temp, res);
     }
 
@@ -438,7 +462,7 @@ size_t BigGuys<T>::get_len() const {
     buf.len = this_clone.len + 1;
     memcpy(buf.guy, this_clone.guy, this_clone.len * BASE_SIZE);
     std::cout << BASE << std::endl;
-   
+
     auto tlen = diver_clone.get_len();
     for(int j = diff_len; j >= 0; j--) {
         bool is_negative = false;
@@ -449,7 +473,7 @@ size_t BigGuys<T>::get_len() const {
         unsigned int long step_3 = (((size_t)buf.guy[j+tlen]) * BASE + buf.guy[j+tlen-1]) / diver_clone[tlen-1];
         std::cout << step_3 << " -- q^ --\n" << buf.guy[j+tlen] << " dafuq\n";// << diver_clone[tlen-1] << " KEK\n";
         //Alexander gave me some advice about arithmetic
-        unsigned int long advice = (buf.guy[j+tlen] * BASE + buf.guy[j+tlen-1]) - step_3 * diver_clone[tlen-1];
+        unsigned int long advice = ((size_t)buf.guy[j+tlen] * BASE + buf.guy[j+tlen-1]) - step_3 * diver_clone[tlen-1];
         std::cout << "Right before while loop\n";
         while (((step_3 * diver_clone[tlen-2]) > (advice * BASE + guy[j+tlen-2])) && (advice < BASE)) {
             --step_3;
@@ -457,7 +481,7 @@ size_t BigGuys<T>::get_len() const {
         }
 
         for(int i = tlen; i >= 0; i--) {
-            temp.guy[i] = buf.guy[i+j]; 
+            temp.guy[i] = buf.guy[i+j];
         }
         temp.clear_insig();
 
@@ -478,7 +502,7 @@ size_t BigGuys<T>::get_len() const {
             temp = temp + diver_clone;
         }
 
-        std::cout << "Before for\n";        
+        std::cout << "Before for\n";
         for(int i = tlen; i >= 0; i--) {
             if ( i < temp.len ) {
                 buf.guy[j+i] = temp.guy[i];
@@ -496,7 +520,7 @@ size_t BigGuys<T>::get_len() const {
     mod.clear_insig();
     res = std::get<0>(buf.div_base(d));
     res.clear_insig();
-    
+
     return std::make_tuple(res, mod);
 }
 */

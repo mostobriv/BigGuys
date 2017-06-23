@@ -12,7 +12,7 @@ using std::string;
 template <typename T>
 class BigGuys {
     public:
-      BigGuys(size_t cap=0);
+      BigGuys(size_t t=0);
       BigGuys(string const);
       BigGuys(BigGuys<T> const &);
       ~BigGuys();
@@ -26,6 +26,7 @@ class BigGuys {
       std::tuple<BigGuys<T>, BigGuys<T>> operator/ (BigGuys<T> &);
       bool operator> (BigGuys<T> const &) const;
       bool operator >= (BigGuys<T> const &source) const;
+      bool operator == (BigGuys<T> const &source);
       BigGuys<T> mul_base(T);
       std::tuple<BigGuys<T>, T> div_base(T);
       T mod_base(T);
