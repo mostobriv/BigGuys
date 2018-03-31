@@ -5,6 +5,7 @@
 #define BASE_SIZE sizeof(T)
 #define SYM_GROUP (BASE_SIZE<<1)
 #define MAX_VAL ((1<<(sizeof(T)<<3)) - 1)
+#define BITS_SIZE (BASE_SIZE<<3)
 #define BASE (((size_t)MAX_VAL)+1)
 
 template<typename T>
@@ -321,13 +322,51 @@ std::tuple<BigGuys<T>, BigGuys<T>> BigGuys<T>::operator/ (BigGuys<T> & source) {
 }
 
 template <typename T>
-BigGuys<T> BigGuys<T>::power(size_t const pw) const {
-    BigGuys<T> tmp("1");
+size_t BigGuys<T>::get_binary_len() const {
+    /*
+    Utility-Function to get amount of bits in BigGuy
+    */
+    auto len = get_len();
+    auto last = this->guy[len-1];
+    while (last != 0) {
+        last>>= 1;
+        len++;
+    }
 
-    for(size_t i = 1; i <= pw; i++)
-        tmp = tmp * (*this);
+    return len;
+}
 
-    return tmp;
+template <typename T>
+size_t BigGuys<T>::get_binary_index(size_t index) const {
+    /*
+    Utility-Function to get bit on index place in BigGuy vector
+    */
+    auto b = index / BITS_SIZE, i = index % BITS_SIZE;
+
+    return (guy[b] & (1 << i)) == 0 ? 0 : 1;
+}
+
+template <typename T>
+BigGuys<T> BigGuys<T>::power(const BigGuys<T>& pw, const BigGuys<T>& mod) const {
+    BigGuys<T> q = (*this), z("1"), modb = mod;
+
+    if (pw[0] == 1) {
+        z = q;
+    }
+
+
+    for (size_t i = 1; i < pw.get_binary_len(); i++) {
+        auto result = (q * q) / modb;
+        q = std::get<1>(result);
+
+        if (pw.get_binary_index(i) == 1) {
+            auto result = (q * z) / modb;
+            z = std::get<1>(result);
+        }
+    }
+
+
+    return z;
 }
 
 template <typename T>

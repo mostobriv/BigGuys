@@ -52,14 +52,16 @@ int main()
     std::getline(std::cin, foo);
     std::string bar;
     std::getline(std::cin, bar);
+    std::string zxc;
+    std::getline(std::cin, zxc);
 
-
-    BigGuys<unsigned short int> kek(foo.c_str()), lol(bar.c_str());
+    BigGuys<unsigned short int> kek(foo.c_str()), lol(bar.c_str()), rofl(zxc.c_str());
     //BigGuys<unsigned short int> tmp(10);
-    auto tmp = kek / lol;
+    auto tmp = kek.power(lol, rofl);
+    std::cout << tmp;
     //std::cout << tmp;
-    std::cout << std::get<0>(tmp);
-    std::cout << std::get<1>(tmp);
+    //std::cout << std::get<0>(tmp);
+    //std::cout << std::get<1>(tmp);
 /*
     std::cout << kek.power(0);
     std::cout << kek.power(1);

@@ -32,8 +32,10 @@ class BigGuys {
       T mod_base(T);
       size_t get_cap() const;
       size_t get_len() const;
-      BigGuys<T> power(size_t const) const;
+      BigGuys<T> power(const BigGuys<T>&, const BigGuys<T>&) const;
     private:
+      size_t get_binary_len() const;
+      size_t get_binary_index(size_t) const;
       void clear_insig();
       T* guy;
       size_t len;
