@@ -1,7 +1,10 @@
 #include "BigGuys.rel.h"
+#include <ctime>
 
-int main()
+
+int main(int argc, char** argv)
 {
+    // std::cout << modInverse(123561, 0x10000);
   /*
 	std::string zxc;
 	std::getline(std::cin, zxc);
@@ -48,17 +51,38 @@ int main()
   std::cout.unsetf(std::ios::hex | std::ios::uppercase);
   std::cout.setf(std::ios::dec);
 */
+    // BigGuys<unsigned short int> foo;
+    // foo.gen_rand_vec(101);
+    // std::cout << foo;
+
+/*
     std::string foo;
     std::getline(std::cin, foo);
     std::string bar;
     std::getline(std::cin, bar);
-    std::string zxc;
-    std::getline(std::cin, zxc);
-
-    BigGuys<unsigned short int> kek(foo.c_str()), lol(bar.c_str()), rofl(zxc.c_str());
+    //std::string zxc;
+    BigGuys<unsigned short int> kek(foo.c_str()), lol(bar.c_str());
+    clock_t timestamp;
     //BigGuys<unsigned short int> tmp(10);
-    auto tmp = kek.power(lol, rofl);
-    std::cout << tmp;
+    timestamp = clock();
+
+    kek.karacuba_mul(lol);
+
+    timestamp = clock() - timestamp;
+
+    std::cout << clock << std::endl;
+
+    timestamp = clock();
+
+    kek * lol;
+    
+    timestamp = clock() - timestamp;
+
+    std::cout << timestamp << std::endl; 
+*/
+
+
+
     //std::cout << tmp;
     //std::cout << std::get<0>(tmp);
     //std::cout << std::get<1>(tmp);

@@ -24,7 +24,7 @@ class BigGuys {
       BigGuys<T> operator- (BigGuys<T> const &);
       BigGuys<T> operator* (BigGuys<T> const &);
       std::tuple<BigGuys<T>, BigGuys<T>> operator/ (BigGuys<T> &);
-      bool operator> (BigGuys<T> const &) const;
+      bool operator > (BigGuys<T> const &) const;
       bool operator >= (BigGuys<T> const &source) const;
       bool operator == (BigGuys<T> const &source);
       BigGuys<T> mul_base(T);
@@ -32,7 +32,15 @@ class BigGuys {
       T mod_base(T);
       size_t get_cap() const;
       size_t get_len() const;
+      void kek();
+      void fill_with_random();
+      void gen_rand_vec(const size_t);
+      bool miller_rabin_is_prime(size_t);
+      BigGuys<T> RightShift(size_t);
+      BigGuys<T> MR(BigGuys<T> &);
       BigGuys<T> power(const BigGuys<T>&, const BigGuys<T>&) const;
+      BigGuys<T> karacuba_mul(BigGuys<T> &);
+      BigGuys<T> prime_generator(size_t);
     private:
       size_t get_binary_len() const;
       size_t get_binary_index(size_t) const;
